@@ -2,6 +2,7 @@ package org.mozilla.materialfennec;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -21,8 +22,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import org.mozilla.materialfennec.search.SearchInputView;
+import org.mozilla.materialfennec.web.SimpleWebViewActivity;
+
 public class MainActivity extends AppCompatActivity {
-    private EditText urlView;
+    private SearchInputView urlView;
     private ImageView menuView;
     private ImageView switchView;
     private CardView cardView;
@@ -43,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
         containerView = (LinearLayout) findViewById(R.id.container);
         cardView = (CardView) findViewById(R.id.card);
-        urlView = (EditText) findViewById(R.id.url);
+        urlView = (SearchInputView) findViewById(R.id.url);
         menuView = (ImageView) findViewById(R.id.menu);
         switchView = (ImageView) findViewById(R.id.switcher);
         pagerView = (ViewPager) findViewById(R.id.pager);
@@ -99,6 +103,15 @@ public class MainActivity extends AppCompatActivity {
         tabsView.setupWithViewPager(pagerView);
 
         transition.setDuration(100);
+
+        urlView.addOnCommitListener(new SearchInputView.onCommitListener() {
+            @Override
+            public void onCommited(CharSequence s) {
+                Context c = MainActivity.this;
+                Intent i = SimpleWebViewActivity.getIntent(c, s.toString());
+                c.startActivity(i);
+            }
+        });
     }
 
     @Override

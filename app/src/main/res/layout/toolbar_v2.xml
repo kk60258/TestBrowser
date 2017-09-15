@@ -37,7 +37,7 @@
             android:elevation="2dp"
             android:src="@drawable/search" />
 
-        <EditText
+        <org.mozilla.materialfennec.search.SearchInputView
             android:id="@+id/url"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
