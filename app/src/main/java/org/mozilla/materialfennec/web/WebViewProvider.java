@@ -16,7 +16,6 @@ public class WebViewProvider {
         WebView webView = new MyWebView(context);
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-
         webView.setWebViewClient(new MyWebViewClient());
         webView.setWebChromeClient(new MyWebChromeClient());
         return webView;

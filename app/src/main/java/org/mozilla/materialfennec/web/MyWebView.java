@@ -4,7 +4,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Patterns;
 import android.webkit.WebView;
-import android.widget.Toast;
+
+import org.mozilla.materialfennec.search.SearchHttpHelper;
 
 /**
  * Created by nineg on 2017/9/16.
@@ -33,7 +34,8 @@ public class MyWebView extends WebView {
         } else if (Patterns.WEB_URL.matcher(url).matches()) {
             url = "https://" + url;
         } else {
-            Toast.makeText(getContext(), "Not a valid url", Toast.LENGTH_LONG);
+            //search it
+            url = SearchHttpHelper.getSearchUrl(url);
         }
         super.loadUrl(url);
     }
