@@ -49,6 +49,7 @@
             android:fontFamily="sans-serif-thin"
             android:textSize="14sp"
             android:padding="10dp"
+            android:imeOptions="actionSearch"
             android:singleLine="true" />
 
         <ImageView

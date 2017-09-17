@@ -2,28 +2,30 @@ package org.mozilla.materialfennec;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import org.mozilla.materialfennec.dependency.Dependency;
 import org.mozilla.materialfennec.search.SearchInputView;
-import org.mozilla.materialfennec.web.SimpleWebViewActivity;
+import org.mozilla.materialfennec.search.SearchSuggestionPresenter;
+import org.mozilla.materialfennec.search.SearchSuggestionView;
+import org.mozilla.materialfennec.web.WebViewProvider;
 
 public class MainActivity extends AppCompatActivity {
     private SearchInputView urlView;
@@ -31,11 +33,19 @@ public class MainActivity extends AppCompatActivity {
     private ImageView switchView;
     private CardView cardView;
     private ViewPager pagerView;
+    private ViewGroup mRootContainer;
     private LinearLayout containerView;
+    private ViewGroup mDefaultLandingContainer;
+
     private ImageView clearView;
     private TabLayout tabsView;
-
+    private ViewStub mSearchViewStub;
+    private SearchSuggestionView mSearchSuggestionView;
     private int containerPadding;
+    private ViewController mViewController;
+    private ViewController.ViewHolder mDefaultLandingViewHolder;
+    private SearchInputView.onCommitListener mOnCommitListener;
+    private View.OnFocusChangeListener mOnFocusChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +54,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         containerPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
-
+        mViewController = Dependency.get(ViewController.class);
+        mRootContainer = (ViewGroup) findViewById(R.id.root_container);
+        mDefaultLandingContainer = (ViewGroup) findViewById(R.id.default_landing_container);
         containerView = (LinearLayout) findViewById(R.id.container);
         cardView = (CardView) findViewById(R.id.card);
         urlView = (SearchInputView) findViewById(R.id.url);
@@ -53,21 +65,25 @@ public class MainActivity extends AppCompatActivity {
         pagerView = (ViewPager) findViewById(R.id.pager);
         clearView = (ImageView) findViewById(R.id.clear);
         tabsView = (TabLayout) findViewById(R.id.tabs);
-
+        mSearchViewStub = (ViewStub) findViewById(R.id.search_suggestion_view_stub);
+        mDefaultLandingViewHolder = new ViewController.ViewHolder(MainActivity.class, mDefaultLandingContainer);
         clearView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 urlView.clearFocus();
+                urlView.setText("");
             }
         });
 
-        urlView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mOnFocusChangeListener = new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 switchView.setVisibility(hasFocus ? View.GONE : View.VISIBLE);
                 menuView.setVisibility(hasFocus ? View.GONE : View.VISIBLE);
             }
-        });
+        };
+
+        urlView.addOnFocusChangeListener(mOnFocusChangeListener);
 
         LayoutTransition transition = containerView.getLayoutTransition();
 
@@ -103,15 +119,36 @@ public class MainActivity extends AppCompatActivity {
         tabsView.setupWithViewPager(pagerView);
 
         transition.setDuration(100);
-
-        urlView.addOnCommitListener(new SearchInputView.onCommitListener() {
+        mOnCommitListener = new SearchInputView.onCommitListener() {
             @Override
             public void onCommited(CharSequence s) {
                 Context c = MainActivity.this;
-                Intent i = SimpleWebViewActivity.getIntent(c, s.toString());
-                c.startActivity(i);
+//                Intent i = SimpleWebViewActivity.getIntent(c, s.toString());
+//                c.startActivity(i);
+                if (TextUtils.isEmpty(s))
+                    return;
+
+                WebView webView = (WebView) mRootContainer.findViewById(R.id.webview);
+                if (webView == null) {
+                    webView = WebViewProvider.createWebView(c);
+                    webView.setId(R.id.webview);
+                    mRootContainer.addView(webView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                }
+                webView.loadUrl(s.toString());
+                ViewController.ViewHolder holder = new ViewController.ViewHolder(webView.getClass(), webView);
+                mViewController.setFocusView(holder);
             }
-        });
+        };
+        urlView.addOnCommitListener(mOnCommitListener);
+
+        SearchSuggestionPresenter searchSuggestionPresenter = Dependency.get(SearchSuggestionPresenter.class);
+
+        mSearchSuggestionView = (SearchSuggestionView) mSearchViewStub.inflate();
+        searchSuggestionPresenter.setCallback(mSearchSuggestionView);
+        searchSuggestionPresenter.setFeedback(urlView.getSuggestionFeedBack());
+        urlView.addOnTextChangedListener(searchSuggestionPresenter);
+
+        mViewController.setFocusView(mDefaultLandingViewHolder);
     }
 
     @Override
@@ -119,6 +156,13 @@ public class MainActivity extends AppCompatActivity {
         if (urlView.hasFocus()) {
             urlView.clearFocus();
         } else {
+            if (mViewController.canGoback()) {
+                mViewController.goback();
+                return;
+            } else if (mViewController.hasViews()) {
+                mViewController.digOutView();
+                return;
+            }
             super.onBackPressed();
         }
     }
