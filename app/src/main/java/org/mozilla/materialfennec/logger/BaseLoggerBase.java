@@ -7,7 +7,7 @@ import org.mozilla.materialfennec.BuildConfig;
 public class BaseLoggerBase {
     private String mLoggableName;
 
-    public static boolean LOCAL_DEBUG_FLAG = true;
+    public static boolean LOCAL_DEBUG_FLAG = BuildConfig.DEBUG;
 
     public static boolean SECURITY_DEBUG_FLAG = BuildConfig.DEBUG;
 
