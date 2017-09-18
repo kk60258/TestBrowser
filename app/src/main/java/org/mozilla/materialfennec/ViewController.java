@@ -12,6 +12,14 @@ import java.util.Stack;
  * Created by nineg on 2017/9/16.
  */
 
+/**
+ * A hack control to handle view changing.
+ *
+ * Because we don't want to use multiple activities.
+ * 1. More flexibility to do animation tranisiton.
+ * 2. To share the same action bar and other components.
+ * */
+
 public class ViewController {
     private Stack<Class> mViewTagStack = new Stack<>();
     private Map<Class, ViewHolder> mViewTagMap = new HashMap<>();
@@ -112,5 +120,12 @@ public class ViewController {
             return;
         }
         mFocused.goback();
+    }
+
+    //Quick hack to clear all ref to prevent from memory leak
+    //TODO: If there are more activities, clear ref by activity
+    public void clearAll() {
+        mViewTagStack.clear();
+        mViewTagMap.clear();
     }
 }

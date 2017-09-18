@@ -167,6 +167,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mViewController.clearAll();
+    }
+
     public static class HomeAdapter extends FragmentPagerAdapter {
         private static HomePanel[] panels = new HomePanel[] {
             new TopSitesFragment(),
