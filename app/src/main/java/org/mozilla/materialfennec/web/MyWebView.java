@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.util.Patterns;
 import android.webkit.WebView;
 
+import org.mozilla.materialfennec.logger.Logger;
 import org.mozilla.materialfennec.search.SearchHttpHelper;
 
 /**
@@ -29,14 +30,8 @@ public class MyWebView extends WebView {
     }
 
     public void loadUrl(String url) {
-        if (url.startsWith("http://") || url.startsWith("https://")) {
-
-        } else if (Patterns.WEB_URL.matcher(url).matches()) {
-            url = "https://" + url;
-        } else {
-            //search it
-            url = SearchHttpHelper.getSearchUrl(url);
-        }
+        url = UrlHelper.getWebURL(url);
+        Logger.d(MyWebView.class.getSimpleName(), "loadUrl %s", url);
         super.loadUrl(url);
     }
 }

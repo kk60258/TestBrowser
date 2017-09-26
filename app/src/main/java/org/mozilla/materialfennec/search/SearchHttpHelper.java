@@ -24,6 +24,7 @@ import javax.net.ssl.HttpsURLConnection;
  */
 
 public class SearchHttpHelper {
+    public static final String GOOGLE_SEARCH_HOST = "https://www.google.com.tw/";
     private static final String GOOGLE_SEARCH_API = "https://www.google.com.tw/search?q=";
     private static final String SERVER_HOST = "https://ac.duckduckgo.com/";
     private static final String SEARCH_HOST_QURY_APPENDANT = "?ko=-1&kl=wt-wt";
