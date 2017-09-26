@@ -62,6 +62,7 @@ public class SearchSuggestionView extends FrameLayout implements SearchSuggestio
         mPresenter = Dependency.get(SearchSuggestionPresenter.class);
         mAdapter = new SearchSuggestListAdapter(mPresenter);
         mListView = new ListView(context);
+        mListView.setId(R.id.search_suggestion_listview);
         mListView.setAdapter(mAdapter);
         addView(mListView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
