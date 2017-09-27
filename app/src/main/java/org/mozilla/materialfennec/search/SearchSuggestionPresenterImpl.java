@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import org.mozilla.materialfennec.dependency.Dependency;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class SearchSuggestionPresenterImpl implements SearchSuggestionPresenter 
                 mLastSyncTask.cancel(true);
             }
 
-            mLastSyncTask = new SuggestionAsyncTask(mSuggestionCallback);
+            mLastSyncTask = new SuggestionAsyncTask(mSuggestionCallback, Dependency.get(SuggestionIdlingResource.class));
             //serial executor
             mLastSyncTask.execute(s);
         } else {

@@ -2,9 +2,12 @@ package org.mozilla.materialfennec;
 
 
 import android.content.res.Resources;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingResource;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -16,6 +19,8 @@ import android.widget.TextView;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +47,20 @@ public class ClickSearchSuggestionTest {
     @Rule
     public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
 
+    private IdlingResource mIdlingResource;
+
+    @Before
+    public void setup() {
+        mIdlingResource = mActivityTestRule.getActivity().getIdlingResource();
+        Espresso.registerIdlingResources(mIdlingResource);
+    }
+
+    @After
+    public void release() {
+        if (mIdlingResource != null) {
+            Espresso.unregisterIdlingResources(mIdlingResource);
+        }
+    }
     /***
      * To check
      *
@@ -57,15 +76,6 @@ public class ClickSearchSuggestionTest {
         ViewInteraction searchInputView = onView(
                 allOf(withId(R.id.url), isDisplayed()));
         searchInputView.perform(typeText(INPUT_STRING), closeSoftKeyboard());
-
-
-        //Wait for AsyncTask to get the suggestion via http
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
 
         int childSize = getListChildCount(R.id.search_suggestion_listview);
         for (int i = 0; i < childSize -1; ++i) {

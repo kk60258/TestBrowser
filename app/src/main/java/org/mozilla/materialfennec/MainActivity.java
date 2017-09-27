@@ -3,7 +3,11 @@ package org.mozilla.materialfennec;
 import android.animation.LayoutTransition;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.TabLayout;
+import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -25,6 +29,7 @@ import org.mozilla.materialfennec.dependency.Dependency;
 import org.mozilla.materialfennec.search.SearchInputView;
 import org.mozilla.materialfennec.search.SearchSuggestionPresenter;
 import org.mozilla.materialfennec.search.SearchSuggestionView;
+import org.mozilla.materialfennec.search.SuggestionIdlingResource;
 import org.mozilla.materialfennec.web.WebViewProvider;
 
 public class MainActivity extends AppCompatActivity {
@@ -46,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
     private ViewController.ViewHolder mDefaultLandingViewHolder;
     private SearchInputView.onCommitListener mOnCommitListener;
     private View.OnFocusChangeListener mOnFocusChangeListener;
+
+    @Nullable
+    private SuggestionIdlingResource mIdlingResource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,5 +202,22 @@ public class MainActivity extends AppCompatActivity {
         public int getCount() {
             return panels.length;
         }
+    }
+
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            Dependency.provideDependency(SuggestionIdlingResource.class, new Dependency.DependencyProvider() {
+
+                @Override
+                public SuggestionIdlingResource createDependency() {
+                    return new SuggestionIdlingResource();
+                }
+            });
+
+            mIdlingResource = Dependency.get(SuggestionIdlingResource.class);
+        }
+        return mIdlingResource;
     }
 }

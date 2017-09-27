@@ -6,6 +6,7 @@ import android.content.Context;
 import org.mozilla.materialfennec.ViewController;
 import org.mozilla.materialfennec.search.SearchSuggestionPresenter;
 import org.mozilla.materialfennec.search.SearchSuggestionPresenterImpl;
+import org.mozilla.materialfennec.search.SuggestionIdlingResource;
 
 import java.util.HashMap;
 
@@ -64,11 +65,15 @@ public class Dependency {
     private <T> T createDependency(Object cls) {
         DependencyProvider<T> provider = mProviders.get(cls);
         if (provider == null) {
-            throw new IllegalArgumentException("Unsupported dependency " + cls);
+            return null;
         }
         return provider.createDependency();
     }
 
+
+    public static void provideDependency(Class cls, DependencyProvider provider) {
+        sDependency.mProviders.put(cls, provider);
+    }
 
     public static <T> T get(Class<T> cls) {
         return sDependency.getDependency(cls);
